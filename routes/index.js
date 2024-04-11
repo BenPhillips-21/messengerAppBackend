@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var mongoose = require('mongoose')
 
 const chat_controller = require('../controllers/chatController')
 const user_controller = require('../controllers/userController')
@@ -9,17 +8,13 @@ const passport = require("passport");
 const jwtStrategy = require("../strategies/jwt")
 passport.use(jwtStrategy);
 
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+router.get("/protected", passport.authenticate('jwt', { session: false }), (req, res) => {
+  return res.status(200).send("YAY! this is a protected Route")
+})
 
 router.post("/sign-up", user_controller.userSignUp)
 
 router.post("/login", user_controller.userLogin)
-
-router.get("/protected", passport.authenticate('jwt', { session: false }), (req, res) => {
-  return res.status(200).send("YAY! this is a protected Route")
-})
 
 // Get all chats route
 router.get('/allchats', chat_controller.getAllChats)

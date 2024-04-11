@@ -16,5 +16,5 @@ exports.getOneChat = asyncHandler(async (req, res) => {
 })
 
 exports.sendMessage = asyncHandler(async (req, res) => {
-    res.json(jwt_payload.username)
+    res.json(req.user)
 })
