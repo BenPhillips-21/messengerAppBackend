@@ -114,7 +114,18 @@ exports.sendMessage = asyncHandler(async (req, res) => {
     }
 })
 
-exports.deleteMessage = asyncHandler(async (req, res) => {
+exports.checkIfMessageWriter = asyncHandler(async (req, res, next) => {
+    const messageToUpdate = await Message.findById(req.params.messageid)
+    let messageWriter = messageToUpdate.writer.toString()
+    let requester = req.user._id.toString()
+    if (messageWriter !== requester) {
+        res.json("Users can only delete their own comments.")
+    } else (
+        next()
+    )
+})
+
+exports.deleteMessage = asyncHandler(async (req, res, next) => {
     try {
         const updatedMessage = await Message.findByIdAndUpdate(
             req.params.messageid,
