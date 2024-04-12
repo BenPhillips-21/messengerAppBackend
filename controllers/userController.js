@@ -57,3 +57,15 @@ exports.userLogin = asyncHandler(async (req, res) => {
       return res.status(500).json({ success: false, msg: "Internal server error" });
     }
   });
+
+  exports.getAllUsers = asyncHandler(async (req, res) => {
+    const allUsers = await User.find({}, "username profilePic")
+    .exec();
+    res.json(allUsers)
+  })
+
+  exports.getCurrentUser = asyncHandler(async (req, res) => {
+    const currentUser = await User.findById(req.user._id)
+    .exec()
+    res.json(currentUser)
+  })

@@ -16,13 +16,16 @@ router.post("/sign-up", user_controller.userSignUp)
 
 router.post("/login", user_controller.userLogin)
 
-// Get all chats route
+router.get("/allusers", user_controller.getAllUsers) 
+
+router.get("/currentuser", passport.authenticate('jwt', {session: false}), user_controller.getCurrentUser)
+
 router.get('/allchats', chat_controller.getAllChats)
-// returns all chats which include the logged in user's id
-// let frontend handle distinguish between who sent what ....
 
 // Get specific chat route
 router.get('/:chatid', chat_controller.getOneChat)
+
+router.post('/createchat/:userid', passport.authenticate('jwt', {session: false}), chat_controller.createChat)
 
 // Post message to chat route
 router.post('/:chatid/sendmessage', passport.authenticate('jwt', { session: false }), chat_controller.sendMessage)
