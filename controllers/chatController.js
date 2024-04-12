@@ -88,7 +88,6 @@ async function updateUserWithChat(userId, chat) {
 }
 
 exports.sendMessage = asyncHandler(async (req, res) => {
-    // a user that is in the chats user array can only post in that chat
     let date = new Date()
     try {
         const message = new Message({
@@ -115,4 +114,24 @@ exports.sendMessage = asyncHandler(async (req, res) => {
     }
 })
 
-// POST create chat route in which the user adds people they want in the chat
+exports.deleteMessage = asyncHandler(async (req, res) => {
+    try {
+        const updatedMessage = await Message.findByIdAndUpdate(
+            req.params.messageid,
+            { $set: { messageContent: "This message has been deleted by its sender." } },
+            { new: true }
+        );
+        
+        if (updatedMessage) {
+            console.log('Updated document:', updatedMessage);
+            return res.json({ success: true, message: 'Field updated successfully', updatedMessage });
+        } else {
+            console.log('No document found with the specified ID.');
+            return res.status(404).json({ success: false, message: 'Document not found' });
+        }
+    } catch (err) {
+        console.log("error caught!!");
+        console.log(err);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});

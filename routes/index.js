@@ -24,6 +24,10 @@ router.post('/createchat/:userid', passport.authenticate('jwt', {session: false}
 
 router.post('/:chatid/sendmessage', passport.authenticate('jwt', { session: false }), chat_controller.sendMessage)
 
+router.get('/:messageid/deletemessage', passport.authenticate('jwt', { session: false }), chat_controller.deleteMessage)
+// updates the message to say "This message has been deleted."
+// user should only be able to delete messages that are their own
+
 router.get('/:chatid/:userid/addtochat', passport.authenticate('jwt', { session: false }), chat_controller.addToChat)
 
 module.exports = router;
