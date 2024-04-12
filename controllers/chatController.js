@@ -4,16 +4,26 @@ const User = require('../models/user')
 
 const asyncHandler = require("express-async-handler");
 
-exports.getAllChats = asyncHandler(async (req, res) => {
-    const allChats = await Chat.find({}, "users messages")
+async function getChat(chatid) {
+    const userChat = await Chat.findById(chatid, "users messages")
     .populate("users")
     .populate("messages")
-    .exec();
-    res.json(allChats)
+    .exec()
+    return userChat;
+}
+
+exports.getAllChats = asyncHandler(async (req, res) => {
+    let allUserChats = []
+    for (i = 0; i < req.user.chats.length; i++) {
+        let result = await getChat(req.user.chats[i]._id)
+        allUserChats.push(result)
+    }
+    res.json(allUserChats)
 })
 
 exports.getOneChat = asyncHandler(async (req, res) => {
-    res.json("Get one chat!!!")
+    let result = await getChat(req.params.chatid)
+    res.json(result)
 })
 
 exports.createChat = asyncHandler(async (req, res, next) => {
@@ -38,10 +48,22 @@ exports.createChat = asyncHandler(async (req, res, next) => {
     }
 });
 
-
-// put the id from the just saved chat into the chat array of each user :)
+async function updateUserWithChat(userId, chat) {
+    const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $push: { chats: chat } },
+        { new: true }
+    );
+    if (updatedUser) {
+        console.log('Updated user document:', updatedUser);
+    } else {
+        console.log('No user document found with the specified ID.');
+    }
+    return updatedUser;
+}
 
 exports.sendMessage = asyncHandler(async (req, res) => {
+    // a user that is in the chats user array can only post in that chat
     let date = new Date()
     try {
         const message = new Message({
@@ -67,19 +89,5 @@ exports.sendMessage = asyncHandler(async (req, res) => {
         console.log(err)
     }
 })
-
-async function updateUserWithChat(userId, chat) {
-    const updatedUser = await User.findByIdAndUpdate(
-        userId,
-        { $push: { chats: chat } },
-        { new: true }
-    );
-    if (updatedUser) {
-        console.log('Updated user document:', updatedUser);
-    } else {
-        console.log('No user document found with the specified ID.');
-    }
-    return updatedUser;
-}
 
 // POST create chat route in which the user adds people they want in the chat
