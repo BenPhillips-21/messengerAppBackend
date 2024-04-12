@@ -5,7 +5,7 @@ const User = require('../models/user')
 const asyncHandler = require("express-async-handler");
 
 async function getChat(chatid) {
-    const userChat = await Chat.findById(chatid, "users messages")
+    const userChat = await Chat.findById(chatid, "users messages chatName")
     .populate("users")
     .populate("messages")
     .exec()
@@ -86,6 +86,19 @@ async function updateUserWithChat(userId, chat) {
     }
     return updatedUser;
 }
+
+exports.changeChatName = asyncHandler(async (req, res) => {
+    const updatedChat = await Chat.findByIdAndUpdate(
+        req.params.chatid,
+        { $set: { chatName: req.body.newChatName }},
+        { new: true }
+    )
+    if (updatedChat) {
+        return res.json({ success: true, message: "Chat name updated!"})
+    } else {
+        return res.json({ success: false, error: "Chat name failed to update!"})
+    }
+})
 
 exports.sendMessage = asyncHandler(async (req, res) => {
     let date = new Date()
