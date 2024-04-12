@@ -48,6 +48,31 @@ exports.createChat = asyncHandler(async (req, res, next) => {
     }
 });
 
+exports.addToChat = asyncHandler(async (req, res, next) => {
+    try {
+        const updatedChat = await Chat.findByIdAndUpdate(
+            req.params.chatid,
+            { $push: { users: req.params.userid } },
+            { new: true }
+        )
+            if (updatedChat) {
+                console.log("Add user to chat successfully")
+            } else {
+                console.log("User could not be added to chat")
+            }
+        const updatedUser = await updateUserWithChat(req.params.userid, updatedChat)
+            if (updatedUser) {
+                console.log("Added chat to user successfully")
+            } else {
+                console.log("Chat could not be added to user")
+            }
+        return res.json({ success: true, message: "User added to chat!", updatedChat, updatedUser });
+    } catch (err) {
+        console.log(err, "error")
+        next(err)
+    }
+})
+
 async function updateUserWithChat(userId, chat) {
     const updatedUser = await User.findByIdAndUpdate(
         userId,
