@@ -1,6 +1,8 @@
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs")
 const User = require("../models/user");
+const cloudinary = require("../utils/cloudinary");
+// const upload = require("../middleware/multer");
 
 require('dotenv').config();
 
@@ -65,7 +67,57 @@ exports.userLogin = asyncHandler(async (req, res) => {
   })
 
   exports.getCurrentUser = asyncHandler(async (req, res) => {
-    const currentUser = await User.findById(req.user._id)
+    const currentUser = await User.findById(req.user._id, "-password")
     .exec()
     res.json(currentUser)
+  })
+
+  exports.updateCurrentUser = asyncHandler(async (req, res) => {
+    const update = { $set: {} }
+
+    if (req.body.username) {
+      update.$set.username = req.body.username;
+  }
+
+    if (req.body.bio) {
+        update.$set.bio = req.body.bio;
+    }
+
+  const updatedUser = await User.findByIdAndUpdate(req.user._id, update);
+  
+  if (updatedUser) {
+      console.log('Updated user document:', updatedUser);
+      return res.json({ success: true, message: 'Field updated successfully', updatedUser });
+  } else {
+      console.log('No user document found with the specified ID.');
+      return res.status(404).json({ success: false, message: 'No user document found with the specified ID.' });
+  }
+  })
+
+  exports.updateProfilePicture = asyncHandler(async (req, res) => {
+    try {
+      const imageUpload = await cloudinary.uploader.upload(req.file.path);
+  
+      const updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          $set: {
+            profilePic: {
+              public_id: imageUpload.public_id,
+              url: imageUpload.secure_url,
+            },
+          },
+        },
+        { new: true }
+      );
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });  
+
+  exports.getUser = asyncHandler(async (req, res) => {
+    const requestedUser = await User.findById(req.params.userid, "username bio profilePic")
+    .exec()
+    res.json(requestedUser)
   })

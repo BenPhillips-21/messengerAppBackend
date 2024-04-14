@@ -142,7 +142,7 @@ exports.deleteMessage = asyncHandler(async (req, res, next) => {
     try {
         const updatedMessage = await Message.findByIdAndUpdate(
             req.params.messageid,
-            { $set: { messageContent: "This message has been deleted by its sender." } },
+            { $set: { messageContent: "This message has been deleted by it's sender." } },
             { new: true }
         );
         
