@@ -59,6 +59,36 @@ exports.userLogin = asyncHandler(async (req, res) => {
     }
   });
 
+  exports.demoLogin = asyncHandler(async (req, res) => {
+    let demoUsername = "demoUser"
+    let demoPassword = "demoPassword"
+    try {
+      const user = await User.findOne({ username: demoUsername });
+      if (!user) {
+        return res.status(401).json({ success: false, msg: "Could not find user" });
+      }
+  
+      const match = await bcrypt.compare(demoPassword, user.password);
+      if (!match) {
+        return res.status(401).json({ success: false, msg: "Incorrect password" });
+      }
+  
+      const opts = {};
+      opts.expiresIn = 60 * 60 * 24;
+      const secret = process.env.secret;
+      const token = jwt.sign({ username: user.username }, secret, opts);
+  
+      return res.status(200).json({
+        success: true,
+        message: "Authentication successful",
+        token
+      });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, msg: "Internal server error" });
+    }
+  })
+
   exports.getAllUsers = asyncHandler(async (req, res) => {
     const allUsers = await User.find({}, "username profilePic")
     .exec();

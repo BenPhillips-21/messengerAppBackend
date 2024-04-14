@@ -15,6 +15,8 @@ router.post("/sign-up", user_controller.userSignUp)
 
 router.post("/login", user_controller.userLogin)
 
+router.post("/demologin", user_controller.demoLogin)
+
 router.get("/allusers", user_controller.getAllUsers) 
 
 router.get("/currentuser", passport.authenticate('jwt', {session: false}), user_controller.getCurrentUser)
@@ -24,8 +26,6 @@ router.post("/updatecurrentuser", passport.authenticate('jwt', {session: false})
 router.post("/updateprofilepicture", passport.authenticate('jwt', {session: false}), upload.single('image'), user_controller.updateProfilePicture)
 
 router.get("/getuser/:userid", user_controller.getUser)
-
-// login as demo user
 
 router.get('/allchats', passport.authenticate('jwt', {session: false}), chat_controller.getAllChats)
 
