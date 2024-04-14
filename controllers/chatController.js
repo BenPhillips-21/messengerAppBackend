@@ -1,6 +1,7 @@
 const Message = require('../models/message') 
 const Chat = require('../models/chat.js')
 const User = require('../models/user')
+const cloudinary = require("../utils/cloudinary");
 
 const asyncHandler = require("express-async-handler");
 
@@ -126,6 +127,44 @@ exports.sendMessage = asyncHandler(async (req, res) => {
         console.log(err)
     }
 })
+
+exports.uploadImage = asyncHandler(async (req, res) => {
+    try {
+        console.log(req.file.path)
+        console.log("bello!")
+        const date = new Date();
+
+        const imageUpload = await cloudinary.uploader.upload(req.file.path);
+
+        const message = new Message({
+            dateSent: date,
+            writer: req.user._id,
+            image: {
+                public_id: imageUpload.public_id,
+                url: imageUpload.secure_url
+            }
+        });
+
+        await message.save();
+
+        const updatedDocument = await Chat.findByIdAndUpdate(
+            req.params.chatid,
+            { $push: { messages: message } }, 
+            { new: true }
+        );
+
+        if (updatedDocument) {
+            console.log('Updated document:', updatedDocument);
+            return res.json({ success: true, message: "Message saved!" });
+        } else {
+            console.log('No document found with the specified ID.');
+            return res.status(404).json({ success: false, message: "Chat not found" });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json({ error: error.message });
+    }
+});
 
 exports.checkIfMessageWriter = asyncHandler(async (req, res, next) => {
     const messageToUpdate = await Message.findById(req.params.messageid)

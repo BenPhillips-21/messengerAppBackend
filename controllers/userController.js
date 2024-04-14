@@ -2,7 +2,6 @@ const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs")
 const User = require("../models/user");
 const cloudinary = require("../utils/cloudinary");
-// const upload = require("../middleware/multer");
 
 require('dotenv').config();
 
