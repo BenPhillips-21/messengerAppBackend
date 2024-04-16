@@ -33,9 +33,7 @@ router.get('/:chatid', chat_controller.getOneChat)
 
 router.post('/createchat/:userid', passport.authenticate('jwt', {session: false}), chat_controller.createChat)
 
-router.post('/:chatid/sendmessage', passport.authenticate('jwt', { session: false }), chat_controller.sendMessage)
-
-router.post('/:chatid/uploadimage', passport.authenticate('jwt', {session: false}), upload.single('image'), chat_controller.uploadImage)
+router.post('/:chatid/sendmessage', passport.authenticate('jwt', { session: false }), upload.single('image'), chat_controller.sendMessage)
 
 router.post("/:chatid/changechatname", passport.authenticate('jwt', { session: false }), chat_controller.changeChatName)
 

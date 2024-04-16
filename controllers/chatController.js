@@ -8,11 +8,12 @@ const asyncHandler = require("express-async-handler");
 async function getChat(chatid) {
     const userChat = await Chat.findById(chatid, "users messages chatName")
     .populate("users")
-    .populate("messages")
+    .populate({path: "messages", populate: {path: "writer"}})
     .exec()
     return userChat;
 }
 
+// sort them by most recent message sent
 exports.getAllChats = asyncHandler(async (req, res) => {
     let allUserChats = []
     for (i = 0; i < req.user.chats.length; i++) {
@@ -104,52 +105,36 @@ exports.changeChatName = asyncHandler(async (req, res) => {
 exports.sendMessage = asyncHandler(async (req, res) => {
     let date = new Date()
     try {
-        const message = new Message({
-            dateSent: date,
-            writer: req.user,
-            messageContent: req.body.messageContent
-        })
-        await message.save()
-
-        Chat.findByIdAndUpdate(
-            req.params.chatid,
-            { $push: { messages: message } }, 
-            { new: true }
-        ).then(updatedDocument => {
-            if (updatedDocument) {
-                console.log('Updated document:', updatedDocument);
-            } else {
-                console.log('No document found with the specified ID.');
-            }
-            return res.json({ success: true, message: "Message saved!"})
-        })
-    } catch (err) {
-        console.log(err)
-    }
-})
-
-exports.uploadImage = asyncHandler(async (req, res) => {
-    try {
-        console.log(req.file.path)
-        console.log("bello!")
-        const date = new Date();
-
-        const imageUpload = await cloudinary.uploader.upload(req.file.path);
-
-        const message = new Message({
+        const message = {
             dateSent: date,
             writer: req.user._id,
+            messageContent: '',
             image: {
-                public_id: imageUpload.public_id,
-                url: imageUpload.secure_url
+                public_id: '',
+                url: ''
             }
-        });
+        }
 
-        await message.save();
+        if (req.file !== undefined) {
+            const imageUpload = await cloudinary.uploader.upload(req.file.path);
+            console.log(imageUpload.public_id)
+            console.log(imageUpload.secure_url)
+            console.log(imageUpload)
+            message.image.public_id = imageUpload.public_id
+            message.image.url = imageUpload.secure_url
+        }
+
+        if (req.body.messageContent) {
+            message.messageContent = req.body.messageContent;
+        }
+
+        const newMessage = new Message(message);
+
+        await newMessage.save();
 
         const updatedDocument = await Chat.findByIdAndUpdate(
             req.params.chatid,
-            { $push: { messages: message } }, 
+            { $push: { messages: newMessage } }, 
             { new: true }
         );
 
@@ -160,11 +145,11 @@ exports.uploadImage = asyncHandler(async (req, res) => {
             console.log('No document found with the specified ID.');
             return res.status(404).json({ success: false, message: "Chat not found" });
         }
-    } catch (error) {
-        console.error(error);
-        return res.status(400).json({ error: error.message });
+
+    } catch (err) {
+        console.log(err)
     }
-});
+})
 
 exports.checkIfMessageWriter = asyncHandler(async (req, res, next) => {
     const messageToUpdate = await Message.findById(req.params.messageid)
