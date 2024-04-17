@@ -37,6 +37,8 @@ router.post('/:chatid/sendmessage', passport.authenticate('jwt', { session: fals
 
 router.post("/:chatid/changechatname", passport.authenticate('jwt', { session: false }), chat_controller.changeChatName)
 
+router.post("/:chatid/changechatimage", passport.authenticate('jwt', { session: false }), upload.single('image'), chat_controller.changeChatImage)
+
 router.get('/:messageid/deletemessage', passport.authenticate('jwt', { session: false }), chat_controller.checkIfMessageWriter, chat_controller.deleteMessage)
 
 router.get('/:chatid/:userid/addtochat', passport.authenticate('jwt', { session: false }), chat_controller.addToChat)

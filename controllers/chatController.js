@@ -6,8 +6,9 @@ const cloudinary = require("../utils/cloudinary");
 const asyncHandler = require("express-async-handler");
 
 async function getChat(chatid) {
-    const userChat = await Chat.findById(chatid, "users messages chatName")
+    const userChat = await Chat.findById(chatid, "users messages chatName image")
     .populate("users")
+    .populate("image")
     .populate({path: "messages", populate: {path: "writer"}})
     .exec()
     return userChat;
@@ -100,6 +101,28 @@ exports.changeChatName = asyncHandler(async (req, res) => {
     } else {
         return res.json({ success: false, error: "Chat name failed to update!"})
     }
+})
+
+exports.changeChatImage = asyncHandler(async (req, res) => {
+    try {
+        const imageUpload = await cloudinary.uploader.upload(req.file.path);
+    
+        const updatedChat = await Chat.findByIdAndUpdate(
+          req.params.chatid,
+          {
+            $set: {
+              image: {
+                public_id: imageUpload.public_id,
+                url: imageUpload.secure_url,
+              },
+            },
+          },
+          { new: true }
+        );
+        res.status(200).json(updatedChat);
+      } catch (error) {
+        res.status(400).json({ error: error.message });
+      }
 })
 
 exports.sendMessage = asyncHandler(async (req, res) => {

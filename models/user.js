@@ -9,17 +9,15 @@ const UserSchema = new Schema({
     profilePic: { 
         public_id: {
             type: String,
-            default: "",
+            default: "fh14w5zwu4oyhvcs2adw",
           },
           url: {
             type: String,
-            default: "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg",
+            default: "https://res.cloudinary.com/dlsdasrfa/image/upload/v1713316628/fh14w5zwu4oyhvcs2adw.png",
           },
         },
     chats: [{type: Schema.Types.ObjectId, ref: "Chat"}],
     admin: { type: Boolean, default: false }
 });
-
-// user should be able to change their username, bio, profilepic
 
 module.exports = mongoose.model("User", UserSchema);
