@@ -43,5 +43,7 @@ router.get('/:messageid/deletemessage', passport.authenticate('jwt', { session: 
 
 router.get('/:chatid/:userid/addtochat', passport.authenticate('jwt', { session: false }), chat_controller.addToChat)
 
+// Add remove user from chat route
+
 module.exports = router;
 
