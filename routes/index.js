@@ -39,11 +39,11 @@ router.post("/:chatid/changechatname", passport.authenticate('jwt', { session: f
 
 router.post("/:chatid/changechatimage", passport.authenticate('jwt', { session: false }), upload.single('image'), chat_controller.changeChatImage)
 
-router.get('/:messageid/deletemessage', passport.authenticate('jwt', { session: false }), chat_controller.checkIfMessageWriter, chat_controller.deleteMessage)
+router.get('/:messageid/deletemessage', passport.authenticate('jwt', { session: false }), chat_controller.deleteMessage)
 
 router.get('/:chatid/:userid/addtochat', passport.authenticate('jwt', { session: false }), chat_controller.addToChat)
 
-// Add remove user from chat route
+router.get('/:chatid/:userid/kickfromchat', passport.authenticate('jwt', { session: false }), chat_controller.kickFromChat)
 
 module.exports = router;
 
