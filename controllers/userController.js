@@ -46,7 +46,7 @@ exports.userLogin = asyncHandler(async (req, res) => {
       const opts = {};
       opts.expiresIn = 60 * 60 * 24;
       const secret = process.env.secret;
-      const token = jwt.sign({ username: user.username }, secret, opts);
+      const token = jwt.sign({ userId: user._id }, secret, opts);
   
       return res.status(200).json({
         success: true,
@@ -76,7 +76,7 @@ exports.userLogin = asyncHandler(async (req, res) => {
       const opts = {};
       opts.expiresIn = 60 * 60 * 24;
       const secret = process.env.secret;
-      const token = jwt.sign({ username: user.username }, secret, opts);
+      const token = jwt.sign({ userId: user._id }, secret, opts);
   
       return res.status(200).json({
         success: true,

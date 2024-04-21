@@ -14,6 +14,7 @@ const ChatSchema = new Schema({
             default: "https://res.cloudinary.com/dlsdasrfa/image/upload/v1713316434/vvg3y9ummnw2a0mir9fk.png",
           },
         },
+    chad: { type: Schema.Types.ObjectId, ref: "User" },
     users: [{ type: Schema.Types.ObjectId, ref: "User" }],
     messages: [{ type: Schema.Types.ObjectId, ref: "Message" }],
 });

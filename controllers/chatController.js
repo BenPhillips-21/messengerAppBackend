@@ -6,8 +6,9 @@ const cloudinary = require("../utils/cloudinary");
 const asyncHandler = require("express-async-handler");
 
 async function getChat(chatid) {
-    const userChat = await Chat.findById(chatid, "users messages chatName image")
+    const userChat = await Chat.findById(chatid, "users messages chatName image chad")
     .populate("users")
+    .populate("chad")
     .populate("image")
     .populate({path: "messages", populate: {path: "writer"}})
     .exec()
@@ -195,3 +196,33 @@ exports.deleteMessage = asyncHandler(async (req, res, next) => {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
+
+exports.kickFromChat = asyncHandler(async (req, res, next) => {
+    try {
+        const updatedChat = await Chat.findByIdAndUpdate(
+            req.params.chatid,
+            { $pull: { users: req.params.userid } },
+            { new: true }
+        )
+
+            if (updatedChat) {
+                console.log("Kicked user from chat successfully")
+            } else {
+                console.log("User could not be kicked from chat")
+            }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.userid,
+            { $pull: { chats: updatedChat._id } },
+            { new: true }
+        )
+
+            if (updatedUser) {
+                res.json({ success: true, message: "User kicked from chat successfully", updatedUser: updatedUser, updatedChat: updatedChat });
+            } else {
+                res.status(404).json({ success: false, message: "No user document found with the specified ID." });
+            }        
+    } catch (err) {
+        res.json(err)
+    }
+})

@@ -8,7 +8,7 @@ opts.secretOrKey = process.env.secret
 
 module.exports = new JwtStrategy(opts, async (jwt_payload, done) => {
     try {
-        const user = await User.findOne({ username: jwt_payload.username });
+        const user = await User.findOne({ _id: jwt_payload.userId });
         if (user) {
             return done(null, user);
         } else {
