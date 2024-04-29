@@ -5,20 +5,38 @@ const cloudinary = require("../utils/cloudinary");
 
 const asyncHandler = require("express-async-handler");
 
-async function getChat(chatid) {
-    const userChat = await Chat.findById(chatid, "users messages chatName image chad")
-    .populate("users")
-    .populate("chad")
-    .populate("image")
-    .populate({path: "messages", populate: {path: "writer"}})
-    .exec()
-    return userChat;
+async function getChat(chatId) {
+    try {
+        const userChat = await Chat.findById(chatId)
+            .populate('users', 'username') // Only populate the username field for users
+            .populate('chad', 'username') // Assuming chad is a user, populate only username
+            .populate('image') // Populate image
+            .populate({
+                path: 'messages',
+                populate: { path: 'writer', select: 'username' } // Populate writer's username only
+            })
+            .exec();
+
+        if (!userChat) {
+            throw new Error('Chat not found');
+        }
+
+        return userChat;
+    } catch (error) {
+        throw new Error(`Error fetching chat: ${error.message}`);
+    }
 }
 
 exports.getOneChat = asyncHandler(async (req, res) => {
-    let result = await getChat(req.params.chatid)
-    res.json(result)
-})
+    const chatId = req.params.chatid;
+
+    try {
+        const result = await getChat(chatId);
+        res.json(result);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+});
 
 exports.getAllChats = asyncHandler(async (req, res) => {
     const chatIds = req.user.chats.map(chat => chat._id);
