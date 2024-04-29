@@ -15,19 +15,24 @@ async function getChat(chatid) {
     return userChat;
 }
 
-exports.getAllChats = asyncHandler(async (req, res) => {
-    let allUserChats = []
-    for (i = 0; i < req.user.chats.length; i++) {
-        let result = await getChat(req.user.chats[i]._id)
-        allUserChats.push(result)
-    }
-    res.json(allUserChats)
-})
-
 exports.getOneChat = asyncHandler(async (req, res) => {
     let result = await getChat(req.params.chatid)
     res.json(result)
 })
+
+exports.getAllChats = asyncHandler(async (req, res) => {
+    const chatIds = req.user.chats.map(chat => chat._id);
+
+    const allUserChats = await Chat.find({ _id: { $in: chatIds } })
+        .select('users messages chatName image chad')
+        .populate('users')
+        .populate('chad')
+        .populate('image')
+        .populate({ path: 'messages', populate: { path: 'writer' } })
+        .exec();
+
+    res.json(allUserChats);
+});
 
 exports.createChat = asyncHandler(async (req, res, next) => {
     const { userid } = req.params;
