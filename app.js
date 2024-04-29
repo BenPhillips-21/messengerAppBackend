@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors');
+const compression = require("compression");
+const helmet = require("helmet");
 
 const mongoose = require('mongoose');
 
@@ -18,6 +20,20 @@ db.on("error", console.error.bind(console, "mongo connection error"));
 
 var app = express();
 
+app.use(compression()); 
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
+    },
+  }),
+);
+const RateLimit = require("express-rate-limit");
+const limiter = RateLimit({
+  windowMs: 1 * 60 * 1000, 
+  max: 60,
+});
+app.use(limiter);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
