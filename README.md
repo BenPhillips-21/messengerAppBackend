@@ -66,7 +66,7 @@ Returns:
 
 Once the user has logged in, they can use the various routes to send messages, create chats, read their chats etc.
 
-Backend Base URL: messengerappbackend-production.up.railway.app
+Backend Base URL: https://messengerappbackend-production.up.railway.app
 
 GET Current User
 
