@@ -15,7 +15,6 @@ async function getChat(chatid) {
     return userChat;
 }
 
-// sort them by most recent message sent
 exports.getAllChats = asyncHandler(async (req, res) => {
     let allUserChats = []
     for (i = 0; i < req.user.chats.length; i++) {
@@ -37,7 +36,8 @@ exports.createChat = asyncHandler(async (req, res, next) => {
     try {
         const chat = new Chat({
             users: chatUsers,
-            messages: []
+            messages: [],
+            chad: req.user._id
         });
         
         await chat.save();
@@ -179,7 +179,12 @@ exports.deleteMessage = asyncHandler(async (req, res, next) => {
     try {
         const updatedMessage = await Message.findByIdAndUpdate(
             req.params.messageid,
-            { $set: { messageContent: "This message has been deleted by it's sender." } },
+            { $set: { messageContent: "This message has been deleted." },
+                      image: {
+                        public_id: '',
+                        url: '',
+                            }
+            },
             { new: true }
         );
         
